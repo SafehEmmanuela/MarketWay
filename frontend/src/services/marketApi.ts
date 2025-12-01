@@ -21,4 +21,17 @@ export const marketApi = {
         const { data } = await apiClient.get(`/product/search?q=${encodeURIComponent(query)}`);
         return data;
     },
+
+    async voiceQuery(audioBlob: Blob): Promise<Blob> {
+        const formData = new FormData();
+        formData.append('file', audioBlob, 'audio.webm');
+
+        const { data } = await apiClient.post('/voice/query', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+            responseType: 'blob',
+        });
+        return data;
+    },
 };
