@@ -1,213 +1,168 @@
 {
-    "market_name": "Bamenda Main Market",
-    "lines": [
-        {
-            "id": "LI",
-            "line_name": "Mothers Line",
-            "items_sold": [
-                "medicine",
-                "babystuff",
-                "cookedfood"
-            ],
-            "layout": {
-                "column": "left",
-                "order": 1
-            }
-        },
-        {
-            "id": "LII",
-            "line_name": "Family Line",
-            "items_sold": [
-                "drinks",
-                "fowlfeed",
-                "toothpaste",
-                "ropesandbags",
-                "sleepers"
-            ],
-            "layout": {
-                "column": "left",
-                "order": 2
-            }
-        },
-        {
-            "id": "LIII",
-            "line_name": "Magazine Line",
-            "items_sold": [
-                "pharmacies",
-                "bodylotion",
-                "drinks(egwine)"
-            ],
-            "layout": {
-                "column": "left",
-                "order": 3
-            }
-        },
-        {
-            "id": "LIV",
-            "line_name": "Onitsha Line",
-            "items_sold": [
-                "cosmetics",
-                "wine",
-                "fewpharmacies"
-            ],
-            "layout": {
-                "column": "left",
-                "order": 4
-            }
-        },
-        {
-            "id": "LV",
-            "line_name": "Best Line",
-            "items_sold": [
-                "pharmacies",
-                "clothes",
-                "wine",
-                "bodystuff"
-            ],
-            "layout": {
-                "column": "left",
-                "order": 5
-            }
-        },
-        {
-            "id": "L10",
-            "line_name": "Fish Line",
-            "items_sold": [
-                "dryfish"
-            ],
-            "layout": {
-                "column": "right",
-                "order": 1
-            }
-        },
-        {
-            "id": "L9",
-            "line_name": "Obama Line",
-            "items_sold": [
-                "medicine",
-                "kitchenutensils",
-                "wigs"
-            ],
-            "layout": {
-                "column": "right",
-                "order": 2
-            }
-        },
-        {
-            "id": "L8",
-            "line_name": "Peaceful Line",
-            "items_sold": [
-                "babystuff",
-                "pharmacy",
-                "wine"
-            ],
-            "layout": {
-                "column": "right",
-                "order": 3
-            }
-        },
-        {
-            "id": "L7",
-            "line_name": "Blessed Line",
-            "items_sold": [
-                "shoes",
-                "boxes",
-                "buckets",
-                "kitchenutensils"
-            ],
-            "layout": {
-                "column": "right",
-                "order": 4
-            }
-        },
-        {
-            "id": "L6",
-            "line_name": "Victory Line",
-            "items_sold": [
-                "beads",
-                "jewelries",
-                "clothes",
-                "babystuff",
-                "shoes",
-                "wigs",
-                "baggyjeans",
-                "bodylotion",
-                "schoolequipment"
-            ],
-            "layout": {
-                "column": "right",
-                "order": 5
-            }
-        },
-        {
-            "id": "L5",
-            "line_name": "Universal Line",
-            "items_sold": [
-                "clothes",
-                "sleepers",
-                "bags",
-                "kitchenutensils",
-                "hair",
-                "wigs"
-            ],
-            "layout": {
-                "column": "right",
-                "order": 6
-            }
-        },
-        {
-            "id": "L4",
-            "line_name": "Fashion Line",
-            "items_sold": [
-                "clothes",
-                "sportwears",
-                "bodystuff",
-                "mesh",
-                "rainboots"
-            ],
-            "layout": {
-                "column": "right",
-                "order": 7
-            }
-        },
-        {
-            "id": "L3",
-            "line_name": "Wisdom Line",
-            "items_sold": [
-                "clothes",
-                "bags",
-                "shoes",
-                "sleepers",
-                "kitchenutensils"
-            ],
-            "layout": {
-                "column": "right",
-                "order": 8
-            }
-        },
-        {
-            "id": "L2",
-            "line_name": "Godly Line",
-            "items_sold": [
-                "shoes",
-                "dresses",
-                "roomdecoitems",
-                "bags",
-                "babystuff"
-            ],
-            "layout": {
-                "column": "right",
-                "order": 9
-            }
-        },
-        {
-            "id": "L1",
-            "line_name": "Rapa Line",
-            "items_sold": [],
-            "layout": {
-                "column": "right",
-                "order": 10
-            }
-        }
-    ]
+    "l1": {
+        "aisle": 1,
+        "line_name": "rapa line",
+        "items_sold": [
+            "loin cloths",
+            "accessories",
+            "jewelries"
+        ],
+        "order": 1
+    },
+    "l2": {
+        "aisle": 1,
+        "line_name": "godly line",
+        "items_sold": [
+            "shoes",
+            "dresses",
+            "roomdecoitems",
+            "bags",
+            "babystuff"
+        ],
+        "order": 2
+    },
+    "l3": {
+        "aisle": 1,
+        "line_name": "wisdom line",
+        "items_sold": [
+            "clothes",
+            "bags",
+            "shoes",
+            "sleepers",
+            "kitchenutensils"
+        ],
+        "order": 3
+    },
+    "l4": {
+        "aisle": 1,
+        "line_name": "fashion line",
+        "items_sold": [
+            "clothes",
+            "sportwears",
+            "bodystuff",
+            "mesh",
+            "rainboots"
+        ],
+        "order": 4
+    },
+    "l5": {
+        "aisle": 1,
+        "line_name": "universal line",
+        "items_sold": [
+            "clothes",
+            "sleepers",
+            "bags",
+            "kitchenutensils",
+            "hair",
+            "wigs"
+        ],
+        "order": 5
+    },
+    "l6": {
+        "aisle": 1,
+        "line_name": "victory line",
+        "items_sold": [
+            "beads",
+            "jewelries",
+            "clothes",
+            "babystuff",
+            "shoes",
+            "wigs",
+            "baggyjeans",
+            "bodylotion",
+            "schoolequipment"
+        ],
+        "order": 6
+    },
+    "l7": {
+        "aisle": 1,
+        "line_name": "blessed line",
+        "items_sold": [
+            "shoes",
+            "boxes",
+            "buckets",
+            "kitchenutensils"
+        ],
+        "order": 7
+    },
+    "l8": {
+        "aisle": 1,
+        "line_name": "peaceful line",
+        "items_sold": [
+            "babystuff",
+            "wine"
+        ],
+        "order": 8
+    },
+    "l9": {
+        "aisle": 1,
+        "line_name": "obama line",
+        "items_sold": [
+            "medicine",
+            "kitchenutensils",
+            "wigs"
+        ],
+        "order": 9
+    },
+    "l10": {
+        "aisle": 1,
+        "line_name": "fish line",
+        "items_sold": [
+            "dryfish"
+        ],
+        "order": 10
+    },
+    "li": {
+        "aisle": 2,
+        "line_name": "best line",
+        "items_sold": [
+            "pharmacies",
+            "clothes",
+            "wine",
+            "bodystuff"
+        ],
+        "order": 1
+    },
+    "lii": {
+        "aisle": 2,
+        "line_name": "onitsha line",
+        "items_sold": [
+            "cosmetics",
+            "wine",
+            "fewpharmacies"
+        ],
+        "order": 2
+    },
+    "liii": {
+        "aisle": 2,
+        "line_name": "magazine line",
+        "items_sold": [
+            "pharmacies",
+            "bodylotion",
+            "drinks(egwine)"
+        ],
+        "order": 3
+    },
+    "liv": {
+        "aisle": 2,
+        "line_name": "family line",
+        "items_sold": [
+            "drinks",
+            "fowlfeed",
+            "toothpaste",
+            "ropesandbags",
+            "sleepers"
+        ],
+        "order": 4
+    },
+    "lv": {
+        "aisle": 2,
+        "line_name": "mothers line",
+        "items_sold": [
+            "medicine",
+            "babystuff",
+            "cookedfood"
+        ],
+        "order": 5
+    }
 }

@@ -32,5 +32,5 @@ async def root():
     }
 
 # Include routers
-from app.api import api
+from app.api.api import api
 app.include_router(api.router)

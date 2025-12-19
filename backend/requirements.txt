@@ -13,3 +13,5 @@ aiofiles
 requests
 pytest
 httpx
+langchain
+langchain_google_genai

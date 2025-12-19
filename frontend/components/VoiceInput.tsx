@@ -12,9 +12,10 @@ export default function VoiceInput({ onTranscript, isListening, setIsListening }
     const [recognition, setRecognition] = useState<any>(null);
 
     useEffect(() => {
-        if (typeof window !== 'undefined' && 'webkitSpeechRecognition' in window) {
+        if (typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
             // @ts-ignore
-            const recognitionInstance = new window.webkitSpeechRecognition();
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recognitionInstance = new SpeechRecognition();
             recognitionInstance.continuous = false;
             recognitionInstance.interimResults = false;
             recognitionInstance.lang = 'en-US';
@@ -56,8 +57,8 @@ export default function VoiceInput({ onTranscript, isListening, setIsListening }
         <button
             onClick={toggleListening}
             className={`p-3 rounded-full transition-all duration-300 ${isListening
-                    ? 'bg-red-500 hover:bg-red-600 animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.5)]'
-                    : 'bg-slate-700 hover:bg-slate-600'
+                ? 'bg-red-500 hover:bg-red-600 animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.5)]'
+                : 'bg-slate-700 hover:bg-slate-600'
                 }`}
             title={isListening ? 'Stop Listening' : 'Start Voice Input'}
         >

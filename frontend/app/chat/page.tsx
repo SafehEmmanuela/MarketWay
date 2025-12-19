@@ -1,41 +1,15 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import dynamic from 'next/dynamic';
 import VoiceInput, { speakText } from '@/components/VoiceInput';
-import { MARKET_LAYOUT, getPathToLine } from '@/config/market_layout';
-import marketDataRaw from '@/marketway_.json';
-
-// Dynamic import for Map to avoid SSR issues
-const DynamicMap = dynamic(() => import('@/components/DynamicMap'), { ssr: false });
-
-interface Message {
-    id: string;
-    sender: 'user' | 'bot';
-    text: string;
-    hasMapAction?: boolean;
-    relatedLineId?: string;
-    images?: string[];
-}
-
-interface RawMarketData {
-    [key: string]: {
-        name: string;
-        items_sold: string[];
-    }
-}
+import { useChat } from '@/hooks/useChat';
 
 export default function ChatPage() {
-    const [messages, setMessages] = useState<Message[]>([]);
+    const { messages, sendMessage, isLoading, clearMessages } = useChat();
     const [inputText, setInputText] = useState('');
     const [isListening, setIsListening] = useState(false);
-    const [isMapOpen, setIsMapOpen] = useState(false);
-    const [activeLineId, setActiveLineId] = useState<string | undefined>(undefined);
-    const [path, setPath] = useState<[number, number][] | undefined>(undefined);
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
-
-    const marketData = marketDataRaw as RawMarketData;
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -45,96 +19,17 @@ export default function ChatPage() {
         scrollToBottom();
     }, [messages]);
 
-    // Transform raw data for map search logic
-    const marketLines = React.useMemo(() => {
-        return Object.entries(marketData).map(([key, value]) => ({
-            id: key,
-            name: value.name,
-            items: value.items_sold
-        }));
-    }, [marketData]);
-
-    const handleSendMessage = (text: string) => {
-        if (!text.trim()) return;
-
-        const newMessage: Message = {
-            id: Date.now().toString(),
-            sender: 'user',
-            text: text
-        };
-
-        setMessages(prev => [...prev, newMessage]);
-        setInputText('');
-
-        // Simulate Bot Response
-        setTimeout(() => {
-            processBotResponse(text);
-        }, 1000);
-    };
-
-    const processBotResponse = async (query: string) => {
-        const lowerQuery = query.toLowerCase();
-        let botText = '';
-        let foundLineId: string | undefined;
-        let images: string[] = [];
-
-        try {
-            // Try Backend API First (using proxy)
-            const res = await fetch('/ask', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ question: query })
-            });
-
-            if (!res.ok) throw new Error('API Error');
-
-            const data = await res.json();
-            botText = data.answer;
-            images = data.images || [];
-
-            if (data.found_lines && data.found_lines.length > 0) {
-                foundLineId = data.found_lines[0].id; // Use the first found line for now
-            }
-
-        } catch (error) {
-            console.warn("Backend unavailable, falling back to local search", error);
-
-            // Fallback: Local Search logic
-            const match = marketLines.find(line =>
-                line.name.toLowerCase().includes(lowerQuery) ||
-                line.items.some(item => item.toLowerCase().includes(lowerQuery))
-            );
-
-            if (match) {
-                const foundItem = match.items.find(item => item.toLowerCase().includes(lowerQuery));
-                const itemText = foundItem ? `You can find ${foundItem}` : `You can find that`;
-                botText = `${itemText} in ${match.name} (${match.id}). Would you like to see it on the map?`;
-                foundLineId = match.id;
-            } else {
-                botText = "I'm sorry, I couldn't find that product in the market. Try searching for 'shoes', 'medicine', or 'bags'.";
-            }
+    useEffect(() => {
+        const lastMessage = messages[messages.length - 1];
+        if (lastMessage && lastMessage.sender === 'bot') {
+            // speakText(lastMessage.text); // Auto-play disabled as per request for manual control
         }
+    }, [messages]);
 
-        const botMessage: Message = {
-            id: (Date.now() + 1).toString(),
-            sender: 'bot',
-            text: botText,
-            hasMapAction: !!foundLineId,
-            relatedLineId: foundLineId,
-            images: images
-        };
-
-        setMessages(prev => [...prev, botMessage]);
-        speakText(botText);
-    };
-
-
-
-    const handleViewMap = (lineId: string) => {
-        setActiveLineId(lineId);
-        const newPath = getPathToLine(lineId);
-        setPath(newPath);
-        setIsMapOpen(true);
+    const handleSendMessage = async (text: string) => {
+        if (!text.trim()) return;
+        setInputText('');
+        await sendMessage(text);
     };
 
     const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -153,7 +48,10 @@ export default function ChatPage() {
                     <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-teal-200 to-purple-400">Sabi Chat</h1>
                 </div>
 
-                <button className="flex items-center gap-2 px-4 py-3 bg-teal-600/20 text-teal-300 rounded-lg hover:bg-teal-600/30 transition-colors mb-6">
+                <button
+                    onClick={clearMessages}
+                    className="flex items-center gap-2 px-4 py-3 bg-teal-600/20 text-teal-300 rounded-lg hover:bg-teal-600/30 transition-colors mb-6"
+                >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                     </svg>
@@ -185,41 +83,6 @@ export default function ChatPage() {
 
             {/* Main Chat Area */}
             <main className="flex-1 flex flex-col relative">
-                {/* Map Overlay/Modal */}
-                {isMapOpen && (
-                    <div className="absolute inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 md:p-12">
-                        <div className="bg-white w-full h-full max-w-5xl rounded-2xl shadow-2xl overflow-hidden flex flex-col relative text-black">
-                            <button
-                                onClick={() => setIsMapOpen(false)}
-                                className="absolute top-4 right-4 z-10 p-2 bg-white/80 rounded-full hover:bg-white shadow-md transition-colors"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-slate-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                            <div className="flex-1 relative">
-                                <DynamicMap
-                                    lines={marketLines}
-                                    layout={MARKET_LAYOUT}
-                                    activeLineId={activeLineId}
-                                    path={path}
-                                />
-                            </div>
-                            <div className="p-4 bg-slate-50 border-t flex justify-between items-center">
-                                <div>
-                                    <h3 className="font-bold text-lg">Market Map</h3>
-                                    <p className="text-sm text-slate-500">Showing route to selected line.</p>
-                                </div>
-                                <button
-                                    onClick={() => setIsMapOpen(false)}
-                                    className="px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800"
-                                >
-                                    Done
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )}
 
                 {/* Image Modal */}
                 {selectedImage && (
@@ -264,50 +127,67 @@ export default function ChatPage() {
                         </div>
                     </div>
                 ) : (
-                    <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6">
-                        {messages.map((msg) => (
-                            <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                <div className={`max-w-[80%] md:max-w-xl p-4 rounded-2xl ${msg.sender === 'user'
-                                    ? 'bg-teal-600 text-white rounded-tr-sm'
-                                    : 'bg-slate-800 text-slate-100 rounded-tl-sm border border-slate-700'
-                                    }`}>
-                                    <p className="whitespace-pre-wrap">{msg.text}</p>
+                    <div className="flex-1 overflow-y-auto p-4 space-y-6">
+                        <div className="max-w-4xl mx-auto w-full space-y-6">
+                            {messages.map((msg) => (
+                                <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                    <div className={`max-w-[80%] md:max-w-xl rounded-2xl overflow-hidden ${msg.sender === 'user'
+                                        ? 'bg-teal-600 text-white rounded-tr-sm p-4'
+                                        : 'bg-slate-800 text-slate-100 rounded-tl-sm border border-slate-700'
+                                        }`}>
 
-                                    {/* Display Images if any */}
-                                    {msg.images && msg.images.length > 0 && (
-                                        <div className="mt-4 grid grid-cols-2 gap-2">
-                                            {msg.images.map((img, idx) => (
+                                        {/* Display Image if any (Moved to top for bot messages) */}
+                                        {msg.image_url && (
+                                            <div className={`${msg.sender === 'user' ? 'mb-4' : ''}`}>
                                                 <div
-                                                    key={idx}
-                                                    className="relative h-32 rounded-lg overflow-hidden border border-slate-600 cursor-pointer hover:opacity-90 transition-opacity"
-                                                    onClick={() => setSelectedImage(img.startsWith('http') ? img : img)}
+                                                    className={`relative h-48 w-full cursor-pointer hover:opacity-90 transition-opacity ${msg.sender === 'bot' ? 'rounded-t-2xl' : 'rounded-lg border border-white/20'}`}
+                                                    onClick={() => setSelectedImage(msg.image_url || null)}
                                                 >
-                                                    {/* Using full URL if it starts with http, otherwise assume backend relative path via proxy */}
                                                     <img
-                                                        src={img.startsWith('http') ? img : img}
+                                                        src={msg.image_url}
                                                         alt="Market item"
                                                         className="object-cover w-full h-full pointer-events-none"
                                                     />
+                                                    {msg.sender === 'bot' && (
+                                                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-60"></div>
+                                                    )}
                                                 </div>
-                                            ))}
-                                        </div>
-                                    )}
+                                            </div>
+                                        )}
 
-                                    {msg.sender === 'bot' && msg.hasMapAction && (
-                                        <button
-                                            onClick={() => msg.relatedLineId && handleViewMap(msg.relatedLineId)}
-                                            className="mt-4 flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm font-medium transition-colors w-full justify-center border border-slate-600"
-                                        >
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                                            </svg>
-                                            View on Map
-                                        </button>
-                                    )}
+                                        <div className={`${msg.sender === 'bot' ? 'p-4' : ''}`}>
+                                            <p className="whitespace-pre-wrap">{msg.text}</p>
+
+                                            {/* Audio Play Button for Bot Messages */}
+                                            {msg.sender === 'bot' && (
+                                                <button
+                                                    onClick={() => speakText(msg.text)}
+                                                    className="mt-3 flex items-center gap-2 text-xs text-slate-400 hover:text-teal-400 transition-colors"
+                                                    title="Read aloud"
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                                                    </svg>
+                                                    Play Audio
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
-                        <div ref={messagesEndRef} />
+                            ))}
+                            {isLoading && (
+                                <div className="flex justify-start">
+                                    <div className="bg-slate-800 text-slate-100 rounded-tl-sm border border-slate-700 p-4 rounded-2xl">
+                                        <div className="flex space-x-2">
+                                            <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"></div>
+                                            <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce delay-100"></div>
+                                            <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce delay-200"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                            <div ref={messagesEndRef} />
+                        </div>
                     </div>
                 )}
 
@@ -322,10 +202,11 @@ export default function ChatPage() {
                                 placeholder="Ask knowing..."
                                 className="w-full bg-slate-800 border border-slate-700 text-white placeholder-slate-500 rounded-2xl pl-4 pr-12 py-3 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none h-[52px]"
                                 rows={1}
+                                disabled={isLoading}
                             />
                             <button
                                 onClick={() => handleSendMessage(inputText)}
-                                disabled={!inputText.trim()}
+                                disabled={!inputText.trim() || isLoading}
                                 className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-teal-500 hover:text-teal-400 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -336,9 +217,9 @@ export default function ChatPage() {
 
                         <VoiceInput onTranscript={(text) => handleSendMessage(text)} isListening={isListening} setIsListening={setIsListening} />
                     </div>
-                    <p className="text-center text-xs text-slate-600 mt-2">
+                    {/* <p className="text-center text-xs text-slate-600 mt-2">
                         Ai can make mistakes, so double check it.
-                    </p>
+                    </p> */}
                 </div>
             </main>
         </div>
